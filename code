@@ -1,0 +1,54 @@
+# Passo 1: Importar bibliotecas e carregar dados
+import tensorflow as tf
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Input  
+
+# Carregar o conjunto de dados Iris
+iris = load_iris()
+X = iris.data   # características (sépalas e pétalas)
+y = iris.target # rótulos (espécies)
+
+# Passo 2: Pré-processamento dos Dados
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Passo 3: Construir o Modelo
+model = Sequential([
+    Input(shape=(4,)),                # camada de entrada (4 features do Iris)
+    Dense(10, activation='relu'),     # camada oculta
+    Dense(8, activation='relu'),      # outra camada oculta
+    Dense(3, activation='softmax')    # camada de saída (3 classes)
+])
+
+# Compilar o modelo
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
+# Passo 4: Treinar o Modelo
+history = model.fit(X_train, y_train, epochs=50, validation_data=(X_test, y_test))
+
+# Passo 5: Avaliar o Modelo
+loss, accuracy = model.evaluate(X_test, y_test)
+print(f"Precisão do modelo: {accuracy:.2f}")
+
+# Passo 6: Fazer Previsões
+y_pred = model.predict(X_test)
+
+print("\nPrimeiras previsões (probabilidades):")
+print(y_pred[:5])
+
+print("\nClasses previstas:")
+print(y_pred.argmax(axis=1)[:5])
+
+print("\nClasses reais:")
+print(y_test[:5])
